@@ -1369,11 +1369,10 @@ var App = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
     _this.state = {
-      loggedInUderId: ''
+      loggedInUserId: ''
     };
 
     _this.LOGIN_DEFAULT_USER = _this.LOGIN_DEFAULT_USER.bind(_this);
-
     return _this;
   }
 
@@ -1387,21 +1386,22 @@ var App = function (_React$Component) {
     value: function LOGIN_DEFAULT_USER() {
       var _this2 = this;
 
+      console.log('Logged in user');
       var request = {
         url: '/user/login',
         method: 'post',
         data: JSON.stringify({ username: 'admin', password: 'admin' }),
         contentType: 'application/json'
       };
-      $.ajax(function (userId) {
+      $.ajax(request).done(function (userId) {
         _this2.setState({
-          loggedInUderId: userId
+          loggedInUserId: userId
         });
       }).fail(function (err) {
         // Redirect to User login form on part 3)
         console.log('UserMenu: err', err);
         _this2.setState({
-          loggedInUderId: '',
+          loggedInUserId: '',
           message: err.responseJSON.message
         });
       });
@@ -1417,7 +1417,7 @@ var App = function (_React$Component) {
       };
       $.ajax(request).done(function () {
         _this3.setState({
-          loggedInUderId: ''
+          loggedInUserId: ''
         });
       }).fail(function (err) {
         _this3.setState({
@@ -1428,15 +1428,15 @@ var App = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var userDate = {
-        loggedInUderId: this.state.loggedInUderId,
+      var userData = {
+        loggedInUserId: this.state.loggedInUserId,
         loginUser: this.LOGIN_DEFAULT_USER,
         logoutUser: this.logoutUser.bind(this)
       };
       return _react2.default.createElement(
         'div',
         null,
-        _react2.default.createElement(_Navbar2.default, { history: this.props.history, userDate: userData }),
+        _react2.default.createElement(_Navbar2.default, { history: this.props.history, userData: userData }),
         this.props.children,
         _react2.default.createElement(_Footer2.default, null)
       );
@@ -1728,7 +1728,7 @@ var Home = function (_React$Component) {
 
 exports.default = Home;
 
-},{"./sub-components/MovieCard":25,"react":"react"}],23:[function(require,module,exports){
+},{"./sub-components/MovieCard":26,"react":"react"}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2013,7 +2013,7 @@ var AddMovie = function (_React$Component) {
 
 exports.default = AddMovie;
 
-},{"../../server/utilities/Helpers":28,"react":"react"}],24:[function(require,module,exports){
+},{"../../server/utilities/Helpers":30,"react":"react"}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2027,6 +2027,10 @@ var _react = require('react');
 var _react2 = _interopRequireDefault(_react);
 
 var _reactRouter = require('react-router');
+
+var _NavbarUserMenu = require('./sub-components/NavbarUserMenu');
+
+var _NavbarUserMenu2 = _interopRequireDefault(_NavbarUserMenu);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -2070,6 +2074,7 @@ var Navbar = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var navbarUserMenu = _react2.default.createElement(_NavbarUserMenu2.default, { userData: this.props.userData });
       return _react2.default.createElement(
         'nav',
         { className: 'navbar navbar-default navbar-static-top' },
@@ -2136,7 +2141,8 @@ var Navbar = function (_React$Component) {
                 'Add Movie'
               )
             )
-          )
+          ),
+          navbarUserMenu
         )
       );
     }
@@ -2147,7 +2153,157 @@ var Navbar = function (_React$Component) {
 
 exports.default = Navbar;
 
-},{"react":"react","react-router":"react-router"}],25:[function(require,module,exports){
+},{"./sub-components/NavbarUserMenu":27,"react":"react","react-router":"react-router"}],25:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var UserProfile = function (_React$Component) {
+  _inherits(UserProfile, _React$Component);
+
+  function UserProfile(props) {
+    _classCallCheck(this, UserProfile);
+
+    var _this = _possibleConstructorReturn(this, (UserProfile.__proto__ || Object.getPrototypeOf(UserProfile)).call(this, props));
+
+    _this.state = {
+      username: '',
+      roles: [],
+      information: '',
+      votes: '',
+      reviews: '',
+      message: ''
+    };
+    return _this;
+  }
+
+  _createClass(UserProfile, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      var request = {
+        url: '/api/user/' + this.props.params.userId,
+        method: 'get'
+      };
+      $.ajax(request).done(function (user) {
+        _this2.setState({
+          username: user.username,
+          roles: user.roles,
+          information: user.information,
+          votes: user.votes,
+          reviews: user.reviews
+        });
+      }).fail(function (err) {
+        _this2.setState({
+          message: err.responseJSON.message
+        });
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var nodes = {};
+      nodes.roles = this.state.roles.map(function (role, index) {
+        return _react2.default.createElement(
+          'h4',
+          { key: index, className: 'lead' },
+          _react2.default.createElement(
+            'strong',
+            null,
+            role
+          )
+        );
+      });
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'div',
+          { className: 'container profile-container' },
+          _react2.default.createElement('div', { className: 'profile-img' }),
+          _react2.default.createElement(
+            'div',
+            { className: 'profile-info clearfix' },
+            _react2.default.createElement(
+              'h2',
+              null,
+              _react2.default.createElement(
+                'strong',
+                null,
+                this.state.name
+              )
+            ),
+            _react2.default.createElement(
+              'h4',
+              { className: 'lead' },
+              'Roles:'
+            ),
+            nodes.roles,
+            _react2.default.createElement(
+              'p',
+              null,
+              this.state.information
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'container profile-container' },
+          _react2.default.createElement(
+            'div',
+            { className: 'profile-stats clearfix' },
+            _react2.default.createElement(
+              'ul',
+              null,
+              _react2.default.createElement(
+                'li',
+                null,
+                _react2.default.createElement(
+                  'span',
+                  { className: 'stats-number' },
+                  this.state.votes
+                ),
+                'Votes'
+              )
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'pull-right btn-group' },
+            _react2.default.createElement(
+              'a',
+              { className: 'btn btn-primary' },
+              this.state.showRatedMovies ? 'Hide' : 'Rated movies'
+            )
+          )
+        )
+      );
+    }
+  }]);
+
+  return UserProfile;
+}(_react2.default.Component);
+
+exports.default = UserProfile;
+
+},{"react":"react"}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2179,7 +2335,7 @@ var MovieCard = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (MovieCard.__proto__ || Object.getPrototypeOf(MovieCard)).call(this, props));
 
     _this.state = {
-      movieScore: _this.props.movie.movieScore,
+      movieScore: _this.props.movie.score,
       movieVotes: _this.props.movie.votes
     };
     return _this;
@@ -2240,7 +2396,117 @@ var MovieCard = function (_React$Component) {
 
 exports.default = MovieCard;
 
-},{"react":"react","react-router":"react-router"}],26:[function(require,module,exports){
+},{"react":"react","react-router":"react-router"}],27:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactRouter = require('react-router');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var NavbarUserMenu = function (_React$Component) {
+  _inherits(NavbarUserMenu, _React$Component);
+
+  function NavbarUserMenu(props) {
+    _classCallCheck(this, NavbarUserMenu);
+
+    var _this = _possibleConstructorReturn(this, (NavbarUserMenu.__proto__ || Object.getPrototypeOf(NavbarUserMenu)).call(this, props));
+
+    _this.state = {
+      loggedInUserId: _this.props.userData.loggedInUserId
+    };
+    return _this;
+  }
+
+  _createClass(NavbarUserMenu, [{
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      this.setState({
+        loggedInUserId: nextProps.userData.loggedInUserId
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var userData = this.props.userData;
+      var userMenu = void 0;
+      if (!this.state.loggedInUserId) {
+        userMenu = _react2.default.createElement(
+          'ul',
+          { className: 'nav navbar-nav pull-right' },
+          _react2.default.createElement(
+            'li',
+            null,
+            _react2.default.createElement(
+              'a',
+              { href: '#', onClick: userData.loginUser },
+              'Login'
+            )
+          ),
+          _react2.default.createElement(
+            'li',
+            null,
+            _react2.default.createElement(
+              _reactRouter.Link,
+              { to: '/user/register' },
+              'Register'
+            )
+          )
+        );
+      } else {
+        userMenu = _react2.default.createElement(
+          'ul',
+          { className: 'nav navbar-nav pull-right' },
+          _react2.default.createElement(
+            'li',
+            null,
+            _react2.default.createElement(
+              _reactRouter.Link,
+              { to: '/user/profile/' + this.state.loggedInUserId },
+              'Profile'
+            )
+          ),
+          _react2.default.createElement(
+            'li',
+            null,
+            _react2.default.createElement(
+              'a',
+              { href: '#', onClick: userData.logoutUser },
+              'Logout'
+            )
+          )
+        );
+      }
+
+      return _react2.default.createElement(
+        'div',
+        null,
+        userMenu
+      );
+    }
+  }]);
+
+  return NavbarUserMenu;
+}(_react2.default.Component);
+
+exports.default = NavbarUserMenu;
+
+},{"react":"react","react-router":"react-router"}],28:[function(require,module,exports){
 'use strict';
 
 var _react = require('react');
@@ -2273,7 +2539,7 @@ _reactDom2.default.render(_react2.default.createElement(
   _routes2.default
 ), document.getElementById('app'));
 
-},{"./routes":27,"history/lib/createBrowserHistory":9,"react":"react","react-dom":"react-dom","react-router":"react-router"}],27:[function(require,module,exports){
+},{"./routes":29,"history/lib/createBrowserHistory":9,"react":"react","react-dom":"react-dom","react-router":"react-router"}],29:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2298,16 +2564,21 @@ var _MovieAdd = require('./components/MovieAdd');
 
 var _MovieAdd2 = _interopRequireDefault(_MovieAdd);
 
+var _UserProfile = require('./components/UserProfile');
+
+var _UserProfile2 = _interopRequireDefault(_UserProfile);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _react2.default.createElement(
   _reactRouter.Route,
   { component: _App2.default },
   _react2.default.createElement(_reactRouter.Route, { path: '/', component: _Home2.default }),
-  _react2.default.createElement(_reactRouter.Route, { path: '/movie/Add', component: _MovieAdd2.default })
+  _react2.default.createElement(_reactRouter.Route, { path: '/movie/Add', component: _MovieAdd2.default }),
+  _react2.default.createElement(_reactRouter.Route, { path: '/user/profile/:userId', component: _UserProfile2.default })
 );
 
-},{"./components/App":20,"./components/Home":22,"./components/MovieAdd":23,"react":"react","react-router":"react-router"}],28:[function(require,module,exports){
+},{"./components/App":20,"./components/Home":22,"./components/MovieAdd":23,"./components/UserProfile":25,"react":"react","react-router":"react-router"}],30:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2354,6 +2625,6 @@ var Helpers = function () {
 
 exports.default = Helpers;
 
-},{}]},{},[26])
+},{}]},{},[28])
 
 //# sourceMappingURL=bundle.js.map

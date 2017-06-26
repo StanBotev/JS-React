@@ -8,11 +8,10 @@ export default class App extends React.Component {
     super(props)
 
     this.state = {
-      loggedInUderId: ''
+      loggedInUserId: ''
     }
 
     this.LOGIN_DEFAULT_USER = this.LOGIN_DEFAULT_USER.bind(this)
-
   }
 
   componentDidMount () {
@@ -20,6 +19,7 @@ export default class App extends React.Component {
   }
 
   LOGIN_DEFAULT_USER () {
+    console.log('Logged in user')
     let request = {
       url: '/user/login',
       method: 'post',
@@ -29,13 +29,13 @@ export default class App extends React.Component {
     $.ajax(request)
     .done(userId => {
       this.setState({
-        loggedInUderId: userId
+        loggedInUserId: userId
       })
     })
     .fail(err => { // Redirect to User login form on part 3)
       console.log('UserMenu: err', err)
       this.setState({
-        loggedInUderId: '',
+        loggedInUserId: '',
         message: err.responseJSON.message
       })
     })
@@ -49,7 +49,7 @@ export default class App extends React.Component {
   $.ajax(request)
     .done(() => {
       this.setState({
-        loggedInUderId: ''
+        loggedInUserId: ''
       })
     })
     .fail(err => {
@@ -61,7 +61,7 @@ export default class App extends React.Component {
 
   render () {
     let userData = {
-      loggedInUderId: this.state.loggedInUderId,
+      loggedInUserId: this.state.loggedInUserId,
       loginUser: this.LOGIN_DEFAULT_USER,
       logoutUser: this.logoutUser.bind(this)
     }
